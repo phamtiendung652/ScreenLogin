@@ -2,4 +2,9 @@
     <string name="app_name">LayoutLogin</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="back">BACK 23232</string>
+    <string name="or">Or</string>
+    <string name="sing_in">SING IN</string>
+    <string name="email">Email</string>
+    <string name="password">PassWord</string>
 </resources>

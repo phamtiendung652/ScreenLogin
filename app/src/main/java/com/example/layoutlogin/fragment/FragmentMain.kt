@@ -13,6 +13,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.viewModels
 import com.example.layoutlogin.databinding.FragmentMainBinding
+import kotlin.time.Duration
 
 
 class FragmentMain : Fragment() {
@@ -21,8 +22,6 @@ class FragmentMain : Fragment() {
     private  var binding :FragmentMainBinding?=null
     lateinit var sharedPref:SharedPreferences
 
-    var mailT: String? = null
-    var passT:String? = null
 
 
     override fun onCreateView(
@@ -37,16 +36,30 @@ class FragmentMain : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         binding?.let {
-            it.btnLogin.setOnClickListener {
-                binding?.let {
-                    CheckIsEmpty(it.edtEmail,it.edtPass)
-                }
+            it.btnLogin.setOnClickListener {_ ->
+                viewModel.
+                checkIsEmpty(it.edtEmail.text.toString(),it.edtPass.text.toString())
             }
             it.btnBack.setOnClickListener {
                 ShowDialog()
             }
 
+        }
+        viewModel.loading.observe(viewLifecycleOwner) {
+            if (!it) {
+                val text = "Login Success"
+                val tost = Toast.makeText(context, text, Toast.LENGTH_SHORT)
+                tost.show()
+            }
+        }
+        viewModel.error.observe(viewLifecycleOwner) {
+            if (it.isNotEmpty()) {
+                val tost = Toast.makeText(context, it, Toast.LENGTH_SHORT)
+                tost.show()
+                viewModel.error.postValue("")
+            }
         }
     }
 
@@ -56,6 +69,9 @@ class FragmentMain : Fragment() {
     }
     private fun saveData() {
         sharedPref = activity?.getSharedPreferences("saveData",Context.MODE_PRIVATE)!!
+        var mailT: String? = null
+        var passT:String? = null
+
         binding?.let {
             mailT = it.edtEmail.text.toString()
             passT = it.edtPass.text.toString()
@@ -66,7 +82,6 @@ class FragmentMain : Fragment() {
         editor.putString("_pass",passT)
         editor.apply()
         Toast.makeText(context,"Data đã được lưu",Toast.LENGTH_SHORT).show()
-
     }
 
     override fun onResume() {
@@ -76,6 +91,9 @@ class FragmentMain : Fragment() {
 
     private fun loadData() {
         sharedPref = activity?.getSharedPreferences("saveData",Context.MODE_PRIVATE)!!
+        var mailT: String? = null
+        var passT:String? = null
+
         mailT = sharedPref.getString("_mail",null)
         passT = sharedPref.getString("_pass",null)
 
@@ -92,26 +110,14 @@ class FragmentMain : Fragment() {
         super.onDestroyView()
         binding =null
     }
-     private fun CheckIsEmpty(edtE:EditText,edtP:EditText){
-         val duration = Toast.LENGTH_SHORT
-         if(edtE.text.isNullOrBlank()|| edtP.text.isNullOrBlank()){
-             val text = "Email or Password is empty"
-             val tost = Toast.makeText(context,text, duration)
-             tost.show()
-         }else {
-             val text = "Login Success"
-             val tost = Toast.makeText(context,text, duration)
-             //tost.show()
-             viewModel.loginDelay(tost)
-         }
-     }
+
 
     private fun ShowDialog(){
         val builder = AlertDialog.Builder(context)
         builder.setTitle("EXIT")
             .setMessage("Do you want to exit ?")
             .setCancelable(true)
-            .setPositiveButton("Yes",DialogInterface.OnClickListener { dialog, which -> activity?.finish() })
+            .setPositiveButton("Yes") { _, _ -> activity?.finish() }
             .setNegativeButton("No",DialogInterface.OnClickListener { dialog, which -> dialog.cancel() })
             .show()
     }
